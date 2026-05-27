@@ -9,7 +9,10 @@ import mediapipe as mp
 from fastdtw import fastdtw
 from scipy.spatial.distance import euclidean
 
-mp_pose = mp.solutions.pose
+except AttributeError:
+    # Si Streamlit recarga muy rápido el hilo, forzamos la importación del submódulo nativo
+    import mediapipe.python.solutions.pose as mp_pose_backend
+    mp_pose = mp_pose_backend
 
 # ============================================================
 # 1. CONFIGURACIÓN DE PÁGINA (ORIGINAL)

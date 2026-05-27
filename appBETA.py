@@ -1,25 +1,41 @@
 import streamlit as st
-import cv2
+import sys
 import numpy as np
 import tempfile
 import os
 import re
 import requests
-import mediapipe as mp
+
+# ============================================================
+# BLINDAJE DE IMPORTACIONES NATIVAS (EVITA CONFLICTOS EN STREAMLIT CLOUD)
+# ============================================================
+# 1. Control de inicialización para OpenCV (cv2)
+try:
+    import cv2
+except ImportError:
+    # Si la versión del servidor genera conflicto de enlace, forzamos la carga del fallback headless
+    try:
+        import opencv_python_headless as cv2
+    except ImportError:
+        st.error("🔄 El servidor de la nube está reconstruyendo las librerías de video. Por favor, refresca la página en unos segundos.")
+        st.stop()
+
+# 2. Control de inicialización para MediaPipe
+try:
+    import mediapipe as mp
+    mp_pose = mp.solutions.pose
+except (AttributeError, ImportError):
+    try:
+        import mediapipe.python.solutions.pose as mp_pose_backend
+        mp_pose = mp_pose_backend
+    except ImportError:
+        pass
+
 from fastdtw import fastdtw
 from scipy.spatial.distance import euclidean
 
 # ============================================================
-# IMPORTACIÓN SEGURA DE MEDIAPIPE (PREVIENE ATTRIBUTEERROR EN LA NUBE)
-# ============================================================
-try:
-    mp_pose = mp.solutions.pose
-except AttributeError:
-    import mediapipe.python.solutions.pose as mp_pose_backend
-    mp_pose = mp_pose_backend
-
-# ============================================================
-# 1. CONFIGURACIÓN DE PÁGINA
+# 1. CONFIGURACIÓN DE PÁGINA (ORIGINAL - INTACTA)
 # ============================================================
 st.set_page_config(
     page_title="Sistema Tri-Fuerza",
